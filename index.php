@@ -1,8 +1,13 @@
 <?php
 if (!empty($_POST)) {
-    $temps = filter_input(INPUT_POST, 'temps', FILTER_VALIDATE_INT, FILTER_REQUIRE_ARRAY);
+    $tempsAnyo = filter_input(INPUT_POST, 'temps', FILTER_VALIDATE_INT, FILTER_REQUIRE_ARRAY);
+    $tmaxsAnyo = array_column($tempsAnyo, 'Tmax');
+    $tminsAnyo = array_column($tempsAnyo, 'Tmin');
+
+    array_multisort(
+            $tmaxsAnyo, SORT_NUMERIC, SORT_DESC, $tminsAnyo, SORT_NUMERIC, SORT_DESC, $tempsAnyo);
 } else {
-    $months = array_map(function ($n) {
+    $meses = array_map(function ($n) {
         return (strftime("%B", mktime(0, 0, 0, $n)));
     }, range(1, 12));
 }
@@ -10,7 +15,7 @@ if (!empty($_POST)) {
 
 <html>
     <head>
-        <title>Tempraturas de Madrid</title>
+        <title>Temperaturas de Madrid</title>
         <meta name="viewport" content="width=device-width">
         <meta charset="UTF-8">
         <link rel="stylesheet" href="stylesheet.css">
@@ -26,15 +31,17 @@ if (!empty($_POST)) {
                             <h2>Madrid</h2>
                             <table>
                                 <tr>
-                                    <th>Month</th>
+                                    <th>Mes</th>
                                     <th>Temp</th>
                                 </tr>
-                                <?php foreach ($months as $month): ?>
+                                <?php foreach ($meses as $mes): ?>
                                     <tr>
-                                        <td><?= $month ?></td>                                               
+                                        <td><?= $mes ?></td>                                               
                                         <td>
                                             <input type="number" maxlength="2" size="2" 
-                                                   name='<?= "temps[$month]" ?>' />
+                                                   name=<?= "temps[$mes][Tmax]" ?> value= '<?= mt_rand(5, 50) ?>' />
+                                            <input type="number" maxlength="2" size="2" 
+                                                   name=<?= "temps[$mes][Tmin]" ?> value= '<?= mt_rand(-25, 20) ?>' />
                                         </td>                              
                                     </tr>
                                 <?php endforeach ?>
@@ -50,10 +57,11 @@ if (!empty($_POST)) {
                         <th>Month</th>
                         <th>Temp</th>
                     </tr>
-                    <?php foreach ($temps as $month => $temp): ?>
+                    <?php foreach ($tempsAnyo as $mes => $temps): ?>
                         <tr>
-                            <td><?= $month ?></td> 
-                             <td><?= $temp ?></td>     
+                            <td><?= $mes ?></td> 
+                            <td><?= $temps['Tmax'] ?></td>
+                            <td><?= $temps['Tmin'] ?></td> 
                         </tr>
                     <?php endforeach ?>
                 </table>
